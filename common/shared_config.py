@@ -81,5 +81,5 @@ model_string = {
 }
 task_options = {}
 root_dir = '/'.join(os.path.abspath(__file__).split('/')[:-2])
-path_to_data = '../../data-for-SAVE/input'
-path_to_result = '../../data-for-SAVE/output'
+path_to_data = root_dir + '/data-for-SAVE/input'
+path_to_result = root_dir + '/data-for-SAVE/output'
