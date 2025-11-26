@@ -22,6 +22,7 @@ import time
 from typing import Any, Annotated, Optional
 
 import anthropic
+from perplexity import Perplexity
 import langfun as lf
 import openai
 import pyglove as pg
@@ -62,6 +63,103 @@ class LMSamplingResult(lf.LMSamplingResult):
   """LMSamplingResult with usage information."""
 
   usage: Usage | None = None
+
+
+@lf.use_init_args(['model'])
+class PerplexityModel(lf.LanguageModel):
+  """Perplexity model."""
+
+  model: pg.typing.Annotated[
+      pg.typing.Enum(pg.MISSING_VALUE, _PERPLEXITY_MODELS),
+      'The name of the model to use.',
+  ] = 'sonar'
+  api_key: Annotated[
+      str | None,
+      (
+          'API key. If None, the key will be read from environment variable '
+          "'Perplexity_API_KEY'."
+      ),
+  ] = None
+
+  def _on_bound(self) -> None:
+    super()._on_bound()
+    self.__dict__.pop('_api_initialized', None)
+
+  @functools.cached_property
+  def _api_initialized(self) -> bool:
+    self.api_key = self.api_key or os.environ.get('PERPLEXITY_API_KEY', None)
+
+    if not self.api_key:
+      raise ValueError(
+          'Please specify `api_key` during `__init__` or set environment '
+          'variable `PERPLEXITY_API_KEY` with your chat API key.'
+      )
+
+    return True
+
+  @property
+  def model_id(self) -> str:
+    """Returns a string to identify the model."""
+    return f'Perpexity({self.model})'
+
+  def _get_request_args(
+      self, options: lf.LMSamplingOptions
+  ) -> dict[str, Any]:
+    args = dict(
+        temperature=options.temperature,
+        max_tokens=options.max_tokens,
+        model=self.model,
+    )
+
+    if options.top_p is not None:
+      args['top_p'] = options.top_p
+    if options.top_k is not None:
+      args['top_k'] = options.top_k
+    if options.stop:
+      args['stop_sequences'] = options.stop
+
+    return args
+
+  def _sample(self, prompts: list[lf.Message]) -> list[LMSamplingResult]:
+    assert self._api_initialized
+    return self._complete_batch(prompts)
+
+  def _set_logging(self) -> None:
+    logger: logging.Logger = logging.getLogger('perplexity')
+    httpx_logger: logging.Logger = logging.getLogger('httpx')
+    logger.setLevel(logging.WARNING)
+    httpx_logger.setLevel(logging.WARNING)
+
+  def _complete_batch(
+      self, prompts: list[lf.Message]
+  ) -> list[LMSamplingResult]:
+    def _perplexity_chat_completion(prompt: lf.Message) -> LMSamplingResult:
+      content = prompt.text
+      client = Perplexity(api_key=self.api_key)
+      response = client.chat.completions.create(
+          messages=[{'role': 'user', 'content': content}],
+          **self._get_request_args(self.sampling_options),
+      )
+      model_response = response.choices[0].message.content
+      samples = [lf.LMSample(model_response, score=0.0)]
+      return LMSamplingResult(
+          samples=samples,
+          usage=Usage(
+              prompt_tokens=response.usage.prompt_tokens,
+              completion_tokens=response.usage.completion_tokens,
+          ),
+      )
+
+    self._set_logging()
+    return lf.concurrent_execute(
+        _perplexity_chat_completion,
+        prompts,
+        executor=self.resource_id,
+        max_workers=1,
+        max_attempts=self.max_attempts,
+        retry_interval=self.retry_interval,
+        exponential_backoff=self.exponential_backoff,
+    )
 
 
 @lf.use_init_args(['model'])
@@ -214,11 +312,10 @@ class Model:
         utils.maybe_print_error('No available Perplexity Model specified.')
         utils.stop_all_execution(True)
 
-      return lf.llms.OpenAI(
+      return PerplexityModel(
         model=model_name[11:],
         api_key=shared_config.perplexity_api_key,
-        smpling_options=sampling,
-        base_url="https://api.perplexity.ai"
+        sampling_options=sampling,
       )
     elif model_name.lower().startswith('anthropic:'):
       if not shared_config.anthropic_api_key:
@@ -266,6 +363,7 @@ class Model:
               futures.TimeoutError,
               lf.core.concurrent.RetryError,
               anthropic.AnthropicError,
+              
           ) as e:
             utils.maybe_print_error(e)
             time.sleep(retry_interval)

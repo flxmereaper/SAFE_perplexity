@@ -214,8 +214,8 @@ def main(_) -> None:
   )
   rater_model.print_config()
   result_data['autoeval_configs'] = utils.get_attributes(safe_config)
-  do_side1 = _EVAL_SIDE1.value and result_data['side_1'] not in _DO_NOT_RATE
-  do_side2 = _EVAL_SIDE2.value and result_data['side_2'] not in _DO_NOT_RATE
+  do_side1 = _EVAL_SIDE1.value and result_data.get('side_1') not in _DO_NOT_RATE
+  do_side2 = _EVAL_SIDE2.value and result_data.get('side_2') not in _DO_NOT_RATE
   utils.print_info(f'Evaluating {len(result_data[_PER_PROMPT_DATA])} prompts.')
   evaluate_data(
       result_data=result_data,

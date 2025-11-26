@@ -53,7 +53,7 @@ save_results = True
 #     'claude_instant',
 # ]
 ################################################################################
-responder_model_short = 'gpt_35_turbo'
+responder_model_short = 'sonar'
 
 ################################################################################
 #                               DEBUG SETTINGS

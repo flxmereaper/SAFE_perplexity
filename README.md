@@ -79,6 +79,8 @@ python -m eval.run_eval \
     --result_path=
 ```
 
+To run -> python -m eval.run_eval --result_path=data-for-SAFE/input/input.json
+
 ## Unit Tests
 
 Each file in this directory has a corresponding unit test with the `_test` suffix (e.g., `file.py` would have `file_test.py` for unit tests).

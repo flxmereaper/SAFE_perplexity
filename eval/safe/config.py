@@ -34,7 +34,7 @@ from common import shared_config
 #     'claude_instant',
 # ]
 ################################################################################
-model_short = 'gpt-5'
+model_short = 'sonar'
 model_temp = 0.1
 max_tokens = 512
 
