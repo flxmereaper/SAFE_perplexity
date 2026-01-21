@@ -21,8 +21,8 @@ from common import utils
 from eval.safe import config as safe_config
 # pylint: enable=g-bad-import-order
 
-SYMBOL = 'Foo'
-NOT_SYMBOL = 'Not Foo'
+SYMBOL = 'RELEVEANT'
+NOT_SYMBOL = 'NOT RELEVANT'
 
 _PROMPT_PLACEHOLDER = '[PROMPT]'
 _RESPONSE_PLACEHOLDER = '[RESPONSE]'

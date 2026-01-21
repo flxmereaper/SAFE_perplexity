@@ -62,7 +62,8 @@ supporting evidence.
 5. After stating your reasoning, restate the STATEMENT and then determine your \
 final answer based on your reasoning and the STATEMENT.
 6. Your final answer should be either "{SUPPORTED_LABEL}" or \
-"{NOT_SUPPORTED_LABEL}". Wrap your final answer in square brackets.
+"{NOT_SUPPORTED_LABEL}".
+Important: Wrap your final answer in square brackets.
 
 KNOWLEDGE:
 {_KNOWLEDGE_PLACEHOLDER}
@@ -136,6 +137,7 @@ def maybe_get_final_answer(
   full_prompt = full_prompt.replace(_KNOWLEDGE_PLACEHOLDER, knowledge)
   full_prompt = utils.strip_string(full_prompt)
   model_response = model.generate(full_prompt, do_debug=debug)
+  print(model_response)
   answer = utils.extract_first_square_brackets(model_response)
   answer = re.sub(r'[^\w\s]', '', answer).strip()
 
@@ -160,6 +162,7 @@ def check_atomic_fact(
 
     while not next_search and num_tries <= max_retries:
       next_search = maybe_get_next_search(atomic_fact, search_results, rater)
+      print(next_search.result)
       num_tries += 1
 
     if next_search is None:
@@ -172,6 +175,8 @@ def check_atomic_fact(
       'google_searches': [dataclasses.asdict(s) for s in search_results]
   }
   final_answer, num_tries = None, 0
+
+  print('finished the for')
 
   while not final_answer and num_tries <= max_retries:
     num_tries += 1

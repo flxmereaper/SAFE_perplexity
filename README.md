@@ -79,7 +79,10 @@ python -m eval.run_eval \
     --result_path=
 ```
 
-To run -> python -m eval.run_eval --result_path=data-for-SAFE/input/input.json
+Run in current configuration ->
+```bash
+python -m eval.run_eval --result_path=data-for-SAFE/input/input.json
+```
 
 ## Unit Tests
 

@@ -61,7 +61,7 @@ responder_model_short = 'sonar'
 # show_responder_responses: bool = show responses from responder if debugging.
 ################################################################################
 show_responder_prompts = False
-show_responder_responses = False
+show_responder_responses = True
 
 ################################################################################
 #                               DATA SETTINGS

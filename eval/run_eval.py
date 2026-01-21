@@ -52,7 +52,7 @@ _RESULT_PATH = flags.DEFINE_string(
     'result_path', '', 'Path to the result file to eval.'
 )
 _EVAL_SIDE1 = flags.DEFINE_bool(
-    'eval_side1', True, 'Whether to evaluate Side 1 response.'
+    'eval_side1', False, 'Whether to evaluate Side 1 response.'
 )
 _EVAL_SIDE2 = flags.DEFINE_bool(
     'eval_side2', True, 'Whether to evaluate Side 2 response.'
