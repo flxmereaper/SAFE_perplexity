@@ -40,8 +40,7 @@ will allow you to find additional useful evidence.
 4. Your query should aim to obtain new information that does not appear in the \
 KNOWLEDGE. This new information should be useful for determining the factual \
 accuracy of the given STATEMENT.
-5. Important: Format your final query by putting it in a markdown code block.
-Do not include sources.
+5. Format your final query by putting it in a markdown code block.
 
 KNOWLEDGE:
 {_KNOWLEDGE_PLACEHOLDER}
@@ -64,8 +63,7 @@ supporting evidence.
 final answer based on your reasoning and the STATEMENT.
 6. Your final answer should be either "{SUPPORTED_LABEL}" or \
 "{NOT_SUPPORTED_LABEL}".
-IMPORTANT: Wrap your final answer, either "{SUPPORTED_LABEL}" or "{NOT_SUPPORTED_LABEL}" in square brackets.
-Do not include sources.
+Important: Wrap your final answer in square brackets.
 
 KNOWLEDGE:
 {_KNOWLEDGE_PLACEHOLDER}
@@ -139,6 +137,7 @@ def maybe_get_final_answer(
   full_prompt = full_prompt.replace(_KNOWLEDGE_PLACEHOLDER, knowledge)
   full_prompt = utils.strip_string(full_prompt)
   model_response = model.generate(full_prompt, do_debug=debug)
+  print(model_response)
   answer = utils.extract_first_square_brackets(model_response)
   answer = re.sub(r'[^\w\s]', '', answer).strip()
 
@@ -163,6 +162,7 @@ def check_atomic_fact(
 
     while not next_search and num_tries <= max_retries:
       next_search = maybe_get_next_search(atomic_fact, search_results, rater)
+      print(next_search.result)
       num_tries += 1
 
     if next_search is None:
@@ -176,6 +176,8 @@ def check_atomic_fact(
   }
   final_answer, num_tries = None, 0
 
+  print('finished the for')
+
   while not final_answer and num_tries <= max_retries:
     num_tries += 1
     final_answer = maybe_get_final_answer(
@@ -183,6 +185,6 @@ def check_atomic_fact(
     )
 
   if final_answer is None:
-    utils.maybe_print_error('Unsuccessful parsing for `final_answer`') # leads to runtime error
+    utils.maybe_print_error('Unsuccessful parsing for `final_answer`')
 
   return final_answer, search_dicts

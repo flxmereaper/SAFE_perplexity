@@ -217,9 +217,6 @@ def main(_) -> None:
   do_side1 = _EVAL_SIDE1.value and result_data.get('side_1') not in _DO_NOT_RATE
   do_side2 = _EVAL_SIDE2.value and result_data.get('side_2') not in _DO_NOT_RATE
   utils.print_info(f'Evaluating {len(result_data[_PER_PROMPT_DATA])} prompts.')
-
-  print(result_data[_PER_PROMPT_DATA])
-
   evaluate_data(
       result_data=result_data,
       rater_model=rater_model,

@@ -117,10 +117,7 @@ class SerperAPI:
       if snippet and isinstance(snippet, str):
         snippets.append(snippet.replace('\n', ' '))
       if snippet_highlighted:
-        if snippet_highlighted is list:
-          snippets.append(snippet_highlighted[0])
-        elif snippet_highlighted is str:
-          snippets.append(snippet_highlighted)
+        snippets.append(snippet_highlighted)
 
     if results.get('knowledgeGraph'):
       kg = results.get('knowledgeGraph', {})
