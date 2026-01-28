@@ -30,7 +30,7 @@ IRRELEVANT_LABEL = 'Irrelevant'
 SUPPORTED_LABEL = rate_atomic_fact.SUPPORTED_LABEL
 NOT_SUPPORTED_LABEL = rate_atomic_fact.NOT_SUPPORTED_LABEL
 
-_MAX_PIPELINE_RETRIES = 1
+_MAX_PIPELINE_RETRIES = 3
 
 
 class CheckedStatement:
@@ -164,10 +164,12 @@ def classify_relevance_and_rate(
               )
           )
         except Exception as e:  # pylint: disable=broad-exception-caught
-          traceback.print_exc(e) # Exception was here!
+          traceback.print_exc(e)
           utils.maybe_print_error(e)
           checked_statement, revised_fact_dict, past_steps_dict = None, {}, {}
           num_fails += 1
+
+      print('We out')
 
       if isinstance(checked_statement, CheckedStatement):
         checked_statements.append(checked_statement)

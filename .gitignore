@@ -23,5 +23,8 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-#output files
+# output files
 data-for-SAFE/output
+
+# API-keys
+common/shared_config.py

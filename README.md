@@ -79,9 +79,14 @@ python -m eval.run_eval \
     --result_path=
 ```
 
-Run in current configuration ->
+Run in current configuration
 ```bash
 python -m eval.run_eval --result_path=data-for-SAFE/input/input.json
+```
+
+Run with a remote debugger attached (make sure to install debugpy first)
+```bash
+python -m debugpy --listen 5678 --wait-for-client eval/run_eval.py --parallelize=False --result_path=data-for-SAFE/input/input.json
 ```
 
 ## Unit Tests
