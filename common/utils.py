@@ -80,6 +80,10 @@ def extract_first_square_brackets(input_string: str) -> str:
   else:
     return ''
 
+def extract_last_square_brackets(input_string: str) -> str:
+  """Extracts the contents of the LAST string between square brackets."""
+  result = input_string[input_string.rindex('[') : input_string.rindex[']']]
+  return result;
 
 def extract_first_code_block(
     input_string: str, ignore_language: bool = False

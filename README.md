@@ -84,6 +84,11 @@ Run in current configuration ->
 python -m eval.run_eval --result_path=data-for-SAFE/input/input.json
 ```
 
+Debug in current configuration ->
+```bash
+python -m debugpy --listen 5678 --wait-for-client eval/run_eval.py --parallelize=False --result_path=data-for-SAFE/input/input.json
+```
+
 ## Unit Tests
 
 Each file in this directory has a corresponding unit test with the `_test` suffix (e.g., `file.py` would have `file_test.py` for unit tests).

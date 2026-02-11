@@ -164,7 +164,7 @@ def classify_relevance_and_rate(
               )
           )
         except Exception as e:  # pylint: disable=broad-exception-caught
-          traceback.print_exc(e) # Exception was here!
+          traceback.print_exc(e)
           utils.maybe_print_error(e)
           checked_statement, revised_fact_dict, past_steps_dict = None, {}, {}
           num_fails += 1

@@ -27,6 +27,7 @@ from eval.safe import query_serper
 
 SUPPORTED_LABEL = 'Supported'
 NOT_SUPPORTED_LABEL = 'Not Supported'
+NO_FURTHER_SEARCH_LABEL = 'No Further Search Required'
 
 _STATEMENT_PLACEHOLDER = '[STATEMENT]'
 _KNOWLEDGE_PLACEHOLDER = '[KNOWLEDGE]'
@@ -40,6 +41,9 @@ will allow you to find additional useful evidence.
 4. Your query should aim to obtain new information that does not appear in the \
 KNOWLEDGE. This new information should be useful for determining the factual \
 accuracy of the given STATEMENT.
+Reason whether the provided KNOWLEDGE included in this message provides enough information \
+to determine the factual accuracy of the given STATEMENT.
+If it does, your query should be '{NO_FURTHER_SEARCH_LABEL}'.
 5. Format your final query by putting it in a markdown code block.
 
 KNOWLEDGE:
@@ -61,9 +65,9 @@ KNOWLEDGE.
 supporting evidence.
 5. After stating your reasoning, restate the STATEMENT and then determine your \
 final answer based on your reasoning and the STATEMENT.
-6. Your final answer should be either "{SUPPORTED_LABEL}" or \
+6. Your final answer must be either "{SUPPORTED_LABEL}" or \
 "{NOT_SUPPORTED_LABEL}".
-Important: Wrap your final answer in square brackets.
+7. Wrap your final answer in square brackets
 
 KNOWLEDGE:
 {_KNOWLEDGE_PLACEHOLDER}
@@ -107,7 +111,7 @@ def maybe_get_next_search(
     past_searches: list[GoogleSearchResult],
     model: modeling.Model,
     debug: bool = safe_config.debug_safe,
-) -> GoogleSearchResult | None:
+) -> GoogleSearchResult | None | str:
   """Get the next query from the model."""
   knowledge = '\n'.join([s.result for s in past_searches])
   knowledge = 'N/A' if not knowledge else knowledge
@@ -118,6 +122,8 @@ def maybe_get_next_search(
   query = utils.extract_first_code_block(model_response, ignore_language=True)
 
   if model_response and query:
+    if query == NO_FURTHER_SEARCH_LABEL:
+      return NO_FURTHER_SEARCH_LABEL
     return GoogleSearchResult(query=query, result=call_search(query))
 
   return None
@@ -137,8 +143,8 @@ def maybe_get_final_answer(
   full_prompt = full_prompt.replace(_KNOWLEDGE_PLACEHOLDER, knowledge)
   full_prompt = utils.strip_string(full_prompt)
   model_response = model.generate(full_prompt, do_debug=debug)
-  print(model_response)
-  answer = utils.extract_first_square_brackets(model_response)
+
+  answer = utils.extract_last_square_brackets(model_response)
   answer = re.sub(r'[^\w\s]', '', answer).strip()
 
   if model_response and answer in [SUPPORTED_LABEL, NOT_SUPPORTED_LABEL]:
@@ -162,21 +168,20 @@ def check_atomic_fact(
 
     while not next_search and num_tries <= max_retries:
       next_search = maybe_get_next_search(atomic_fact, search_results, rater)
-      print(next_search.result)
       num_tries += 1
 
     if next_search is None:
       utils.maybe_print_error('Unsuccessful parsing for `next_search`')
       break
     else:
+      if next_search == NO_FURTHER_SEARCH_LABEL:
+        break;
       search_results.append(next_search)
 
   search_dicts = {
       'google_searches': [dataclasses.asdict(s) for s in search_results]
   }
   final_answer, num_tries = None, 0
-
-  print('finished the for')
 
   while not final_answer and num_tries <= max_retries:
     num_tries += 1
